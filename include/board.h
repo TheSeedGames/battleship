@@ -30,7 +30,7 @@ void moveCursor(uint16_t keys);
 void initBoards();
 void initShips();
 void drawBoard(bool screen);
-bool placeShip ();
+void placeShip ();
 void drawShips();
 void drawMenu();
 void switchBoards();

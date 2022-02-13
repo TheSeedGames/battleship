@@ -9,7 +9,7 @@ cell_t *board_lower;
 cell_t *player_board;
 cell_t *oponents_board;
 ship_t *ships;
-ship_t * ship;
+ship_t * active_ship;
 
 void initBoards() {
 	board_lower = (cell_t* ) malloc(sizeof(cell_t) * BOARD_CELLS);
@@ -63,16 +63,16 @@ void drawBoard(bool screen){
 			}
 		glBoxFilled(x+1,y+1,x+15,y+15,color);
 	}
+	drawCursor();
 }
 
 
 void drawCursor() {
-	uint8_t size = ship->size;
+	uint8_t size = active_ship->size;
 	uint8_t pos = flags.active_cell;
-	bool vert = flags.vertical;
 	uint8_t x = (pos % 10)*16;
 	uint8_t y = (pos / 10)*16;
-	if(vert)
+	if(flags.vertical)
 		for (uint8_t sec = 0; sec < size; sec ++) {
 			glBox(x + 5, y + 29 + sec * 16, x + 18, y + 42 + sec * 16, ORANGE);
 			glBox(x + 4, y + 28 + sec * 16, x + 19, y + 43 + sec * 16, ORANGE);
@@ -91,13 +91,13 @@ void drawShips() {
 	glBoxFilled(BOARD_PIXELS_SIDE + 18, 32, BOARD_PIXELS_SIDE + 18 + CELL_SIDE_PIXELS * 4, 48, GREEN);
 }
 
-bool placeShip() {
+void placeShip() {
 	uint8_t step = flags.vertical ? 10 : 1;
 	uint8_t pos = flags.active_cell;
-	uint8_t size = ship->size;
+	uint8_t size = active_ship->size;
 	cell_t *board = board_lower;
 	for (uint8_t cell = pos; cell < (pos + size*step); cell += step)
-		if (board[cell].status != CELL_UNKNOWN) return false;
+		if (board[cell].status != CELL_UNKNOWN) return;
 	for (uint8_t cell = pos; cell < (pos + size*step); cell += step) 
 	{	
 		uint8_t x = cell % 10;
@@ -116,7 +116,8 @@ bool placeShip() {
 	}
 	for (uint8_t cell = pos; cell < (pos + size*step); cell += step) 
 		board[cell].status = CELL_SHIP_INTACT;
-	return true;
+	if (active_ship->id < 8) active_ship ++;
+	else setStatus(setup);
 }
 inline uint8_t checkCell() 
 {
@@ -138,6 +139,7 @@ void initShips() {
 	ships[7] = (ship_t){.size = 1,.id = 7};
 	ships[8] = (ship_t){.size = 1,.id = 8};
 	ships[9] = (ship_t){.size = 1,.id = 9};
+	active_ship = ships;
 }
 
 void moveCursor(uint16_t key) {
@@ -147,9 +149,9 @@ void moveCursor(uint16_t key) {
 	if(key & KEY_LEFT)  flags.active_cell = (((flags.active_cell % 10) + 9) % 10) + (flags.active_cell / 10) * 10;
 	if(key & KEY_RIGHT) flags.active_cell = (((flags.active_cell % 10) + 1) % 10) + (flags.active_cell / 10) * 10;
 	if(flags.vertical) {
-		if(flags.active_cell / 10 > 10 - ship->size) while (flags.active_cell / 10 > 10 - ship->size)  flags.active_cell -= 10;
+		if(flags.active_cell / 10 > 10 - active_ship->size) while (flags.active_cell / 10 > 10 - active_ship->size)  flags.active_cell -= 10;
 	} else { 
-		if (flags.active_cell % 10 > 10 - ship->size) while(flags.active_cell % 10 > 10 - ship->size) flags.active_cell -= 1; 
+		if (flags.active_cell % 10 > 10 - active_ship->size) while(flags.active_cell % 10 > 10 - active_ship->size) flags.active_cell -= 1; 
 	}
 }
 
