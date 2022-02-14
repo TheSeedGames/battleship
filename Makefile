@@ -26,7 +26,7 @@ BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data  
 INCLUDES	:=	include
-PROJECTLIBS	:=	lib
+PJLIBS		:=	lib
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -54,7 +54,7 @@ LIBS	:= -lgl2d -lfilesystem -lfat -lnds9
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(LIBNDS) $(PROJECTLIBS)
+LIBDIRS	:=	$(LIBNDS) $(CURDIR)
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
