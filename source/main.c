@@ -27,48 +27,18 @@ int main() {
 	initShips();
 	initSubSprites();
 	setStatus(place);
-	// sub background holds the top image when 3D directed to bottom
-	// init oam to capture 3D scene
 	swiWaitForVBlank();
 	bgInitSub(3, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
-	/*
-	NF_SetRootFolder("NITROFS");
- 	NF_InitTiledBgBuffers();
- 	NF_InitTiledBgSys(0);
-	NF_LoadTextFont("fnt/default", "normal", 256, 256, 0);
-	NF_CreateTextLayer(0, 0, 0,	"normal");
-	NF_WriteText(0, 0, 1, 1, "Hola Mundo!\n Hello World!");	// Normal
-	
-	NF_UpdateTextLayers();*/
 
-
-
-	uint16_t key;		// for key input
+	uint16_t key;
 	uint8_t frame = 0;
-	
-/*
-	char dbg[256];
-	uint8_t nameLenght = PersonalData->nameLen;
-	uint16_t *nameUTF = malloc(nameLenght);
-	char *nameASCII = malloc(nameLenght);
-	memcpy(nameUTF,PersonalData->name,nameLenght*2);
-	for(uint8_t u = 0; u < nameLenght; u++) {
-		if (nameUTF[u*2]) break;
-		if (nameUTF[u*2+1] & 0x80) break;
-		nameASCII[u] = nameUTF[u*2];
-	}
-	nocashMessage (nameASCII);
-	*/
-	//consoleDemoInit();
-	//iprintf(nameASCII);
 	glScreen2D();
-	//powerOn(POWER_ALL);
 	while( 1 )
 	{
 		frame ++;
-		//read keys
 		scanKeys();
 		key = keysDown();
+		glBegin2D();
 		switch (getStatus()) {
 			case menu:
 				if(key & KEY_B) setMode(mode_single);
@@ -81,6 +51,7 @@ int main() {
 				break;
 			case place:
 				moveCursor(key);
+				drawBoard(frame % 2);
 				if(key & KEY_A) placeShip();
 				break;
 			case setup:
@@ -88,13 +59,16 @@ int main() {
 				break;
 			case play:
 				moveCursor(key);
+				drawBoard(frame % 2);
 				if(key & KEY_A) checkCell();
+				checkLose();
 				break;
 			case end:
 				break;
 		}
+		glEnd2D();
+		glFlush(0);
 		while(REG_DISPCAPCNT & DCAP_ENABLE);
-		
 		if (frame % 2)
 		{
 			//draw botton screen
@@ -111,41 +85,15 @@ int main() {
 			vramSetBankC(VRAM_C_SUB_BG);
 			REG_DISPCAPCNT = DCAP_BANK(3) | DCAP_ENABLE | DCAP_SIZE(3);
 		}
-		
-		glBegin2D();
-		switch (getStatus()) {
-			case menu:
-			case lobby:
-			case join:
-				drawMenu();
-				break;
-			case place:
-			case setup:
-			case play:
-				drawBoard(frame % 2);
-				break;
-			case end:
-		}
-		glEnd2D();
-		glFlush(0);
 		swiWaitForVBlank();
-		
 	}
-
 	return 0;
 }
-
-
 void initSubSprites(void) {
- 
 	oamInit(&oamSub, SpriteMapping_Bmp_2D_256, false);
- 
 	int x = 0;
 	int y = 0;
- 
 	int id = 0;
-
-	//set up a 4x3 grid of 64x64 sprites to cover the screen
 	for(y = 0; y < 3; y++)
 	for(x = 0; x < 4; x++)
 	{
@@ -154,8 +102,6 @@ void initSubSprites(void) {
 		oamSub.oamMemory[id].attribute[2] = ATTR2_ALPHA(1) | (8 * 32 * y) | (8 * x);
 		id++;
 	}
- 
 	swiWaitForVBlank();
- 
 	oamUpdate(&oamSub);
 }

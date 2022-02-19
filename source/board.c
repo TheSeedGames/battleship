@@ -1,5 +1,5 @@
 #include "board.h"
-#include "data_types.h"
+//#include "data_types.h"
 
 
 match_t flags;
@@ -22,13 +22,14 @@ void initBoards() {
 }
 
 void switchBoards(){
-	player_board = board_upper;
-	oponents_board = board_lower;
+	player_board=board_upper;
+	oponents_board=board_lower;
+	setStatus(play);
 }
 
 void drawBoard(bool screen){
-	cell_t *board = board_lower;
-	if (screen) board = board_upper;
+	cell_t *board = player_board;
+	if (screen) board = oponents_board;
 	//BACKGROUND
 	glBoxFilled(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,DARK_GREY);
 	//TITLE
@@ -52,18 +53,18 @@ void drawBoard(bool screen){
 				color = GREEN;
 		 		break;
 			case CELL_SHIP_HIT:
-				color = ORANGE;
+				color = YELLOW;
 		 		break;
 			case CELL_SHIP_DAMAGED:
-				color = RED;
+				color = ORANGE;
 				break;
 			case CELL_SHIP_SUNKEN:
-				color = BLACK;
+				color = RED;
 				break;
 			}
 		glBoxFilled(x+1,y+1,x+15,y+15,color);
 	}
-	drawCursor();
+	if(!screen) drawCursor();
 }
 
 
@@ -116,8 +117,11 @@ void placeShip() {
 	}
 	for (uint8_t cell = pos; cell < (pos + size*step); cell += step) 
 		board[cell].status = CELL_SHIP_INTACT;
-	if (active_ship->id < 8) active_ship ++;
-	else setStatus(setup);
+	if (active_ship->id < 9) {
+		active_ship ++;
+	} else{
+		setStatus(setup);
+	 }
 }
 inline uint8_t checkCell() 
 {
@@ -132,11 +136,11 @@ void initShips() {
 	ships[0] = (ship_t){.size = 4,.id = 0};
 	ships[1] = (ship_t){.size = 3,.id = 1};
 	ships[2] = (ship_t){.size = 3,.id = 2};
-	ships[3] = (ship_t){.size = 2,.id = 3};
+	ships[3] = (ship_t){.size = 3,.id = 3};
 	ships[4] = (ship_t){.size = 2,.id = 4};
 	ships[5] = (ship_t){.size = 2,.id = 5};
-	ships[6] = (ship_t){.size = 1,.id = 6};
-	ships[7] = (ship_t){.size = 1,.id = 7};
+	ships[6] = (ship_t){.size = 2,.id = 6};
+	ships[7] = (ship_t){.size = 2,.id = 7};
 	ships[8] = (ship_t){.size = 1,.id = 8};
 	ships[9] = (ship_t){.size = 1,.id = 9};
 	active_ship = ships;
@@ -153,6 +157,13 @@ void moveCursor(uint16_t key) {
 	} else { 
 		if (flags.active_cell % 10 > 10 - active_ship->size) while(flags.active_cell % 10 > 10 - active_ship->size) flags.active_cell -= 1; 
 	}
+}
+
+bool checkLose(){
+	for (uint8_t cell = 0; cell < 100; cell++) {
+		if (player_board[cell].status & (CELL_SHIP_DAMAGED | CELL_SHIP_INTACT)) return false;
+	}
+	return true;
 }
 
 inline uint8_t getStatus() {
