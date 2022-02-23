@@ -25,7 +25,11 @@
 #define CELL_SIDE_PIXELS	16
 #define BOARD_PIXELS_SIDE CELL_SIDE_PIXELS*BOARD_SIDE_CELLS
 
+#define HALF_WIDTH (SCREEN_WIDTH/2)
+#define HALF_HEIGHT (SCREEN_HEIGHT/2)
+#define BRAD_PI (1 << 14)
 
+void fillWater(cell_t* board);
 void moveCursor(uint16_t keys);
 void initBoards();
 void initShips();

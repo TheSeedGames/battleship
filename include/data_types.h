@@ -19,12 +19,12 @@ extern enum gameMode {
 	mode_host,
 	mode_join
 } gameMode;
-
+/*
 extern enum screens {
 	screen_upper,
 	screen_lower
 } screens;
-
+*/
 extern enum cell_status {
 	CELL_UNKNOWN = 0,
 	CELL_WATER,

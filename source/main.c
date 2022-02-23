@@ -6,11 +6,6 @@
 #include <gl2d.h>
 #include "board.h"
 
-#define HALF_WIDTH (SCREEN_WIDTH/2)
-#define HALF_HEIGHT (SCREEN_HEIGHT/2)
-#define BRAD_PI (1 << 14)
-
-
 uint8_t getStatus();
 void initSubSprites();
 

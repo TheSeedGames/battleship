@@ -12,24 +12,33 @@ ship_t *ships;
 ship_t * active_ship;
 
 void initBoards() {
-	board_lower = (cell_t* ) malloc(sizeof(cell_t) * BOARD_CELLS);
-	board_upper = (cell_t* ) malloc(sizeof(cell_t) * BOARD_CELLS);
+	player_board = (cell_t* ) malloc(sizeof(cell_t) * BOARD_CELLS);
+	oponents_board = (cell_t* ) malloc(sizeof(cell_t) * BOARD_CELLS);
 	memset(board_upper,CELL_UNKNOWN,BOARD_CELLS);
 	memset(board_lower,CELL_UNKNOWN,BOARD_CELLS);
-	player_board = board_lower;
-	oponents_board = board_upper;
+	board_lower = player_board;
+	board_upper = oponents_board;
 
 }
 
 void switchBoards(){
-	player_board=board_upper;
-	oponents_board=board_lower;
+	board_upper = player_board;
+	board_lower = oponents_board;/*
+	DC_FlushRange(&player_board,sizeof(cell_t) * BOARD_CELLS);
+	DC_FlushRange(&oponents_board,sizeof(cell_t) * BOARD_CELLS);
+	DC_InvalidateRange(&player_board,sizeof(cell_t) * BOARD_CELLS);
+	DC_InvalidateRange(&oponents_board,sizeof(cell_t) * BOARD_CELLS);*/
+	fillWater(player_board);
 	setStatus(play);
 }
-
+void fillWater(cell_t* board) {
+	for(uint8_t cell = 0; cell < BOARD_CELLS; cell++) {
+		if (board[cell].status==CELL_UNKNOWN) board[cell].status=CELL_WATER;
+	}
+}
 void drawBoard(bool screen){
-	cell_t *board = player_board;
-	if (screen) board = oponents_board;
+	cell_t *board = board_lower;
+	if (screen) board = board_upper;
 	//BACKGROUND
 	glBoxFilled(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,DARK_GREY);
 	//TITLE
