@@ -24,7 +24,7 @@ int main() {
 	setStatus(place);
 	swiWaitForVBlank();
 	bgInitSub(3, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
-
+	bool turn = false;
 	uint16_t key;
 	uint8_t frame = 0;
 	glScreen2D();
@@ -46,7 +46,8 @@ int main() {
 				break;
 			case place:
 				moveCursor(key);
-				drawBoard(frame % 2);
+				if(!frame % 2)drawBoard(false);
+				else drawShips();
 				if(key & KEY_A) placeShip();
 				break;
 			case setup:
@@ -55,7 +56,11 @@ int main() {
 			case play:
 				moveCursor(key);
 				drawBoard(frame % 2);
-				if(key & KEY_A) checkCell();
+				if(key & KEY_A && turn) {
+					checkCell();
+					turn=false;
+					checkWin();
+				}
 				checkLose();
 				break;
 			case end:

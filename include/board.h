@@ -37,6 +37,7 @@ void drawBoard(bool screen);
 void placeShip ();
 void drawShips();
 void drawMenu();
+bool checkWin();
 bool checkLose();
 void switchBoards();
 uint8_t checkCell();

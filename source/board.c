@@ -23,11 +23,8 @@ void initBoards() {
 
 void switchBoards(){
 	board_upper = player_board;
-	board_lower = oponents_board;/*
-	DC_FlushRange(&player_board,sizeof(cell_t) * BOARD_CELLS);
-	DC_FlushRange(&oponents_board,sizeof(cell_t) * BOARD_CELLS);
-	DC_InvalidateRange(&player_board,sizeof(cell_t) * BOARD_CELLS);
-	DC_InvalidateRange(&oponents_board,sizeof(cell_t) * BOARD_CELLS);*/
+	board_lower = oponents_board;
+	board_lower = oponents_board;
 	fillWater(player_board);
 	setStatus(play);
 }
@@ -172,6 +169,19 @@ bool checkLose(){
 	for (uint8_t cell = 0; cell < 100; cell++) {
 		if (player_board[cell].status & (CELL_SHIP_DAMAGED | CELL_SHIP_INTACT)) return false;
 	}
+	return true;
+}
+
+bool checkWin(){
+	uint8_t hits = 0 ;
+	for (uint8_t cell = 0; cell < 100; cell++) {
+		if (player_board[cell].status & (CELL_SHIP_HIT || CELL_SHIP_SUNKEN)) hits++;
+	}
+	uint8_t targets = 0;
+	for (uint8_t ship = 0; ship < 10; ship++) {
+		targets += ships[ship].size;
+	}
+	if (hits < targets) return false;
 	return true;
 }
 
