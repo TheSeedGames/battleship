@@ -9,7 +9,7 @@ cell_t *board_lower;
 cell_t *player_board;
 cell_t *oponents_board;
 ship_t *ships;
-ship_t * active_ship;
+uint8_t active_ship;
 
 void initBoards() {
 	player_board = (cell_t* ) malloc(sizeof(cell_t) * BOARD_CELLS);
@@ -23,7 +23,6 @@ void initBoards() {
 
 void switchBoards(){
 	board_upper = player_board;
-	board_lower = oponents_board;
 	board_lower = oponents_board;
 	fillWater(player_board);
 	setStatus(play);
@@ -70,12 +69,12 @@ void drawBoard(bool screen){
 			}
 		glBoxFilled(x+1,y+1,x+15,y+15,color);
 	}
-	if(!screen) drawCursor();
+	//if(!screen) drawCursor();
 }
 
 
 void drawCursor() {
-	uint8_t size = active_ship->size;
+	uint8_t size = ships[active_ship].size;
 	uint8_t pos = flags.active_cell;
 	uint8_t x = (pos % 10)*16;
 	uint8_t y = (pos / 10)*16;
@@ -101,7 +100,8 @@ void drawShips() {
 void placeShip() {
 	uint8_t step = flags.vertical ? 10 : 1;
 	uint8_t pos = flags.active_cell;
-	uint8_t size = active_ship->size;
+	ship_t  ship = ships[active_ship];
+	uint8_t size = ship.size;
 	cell_t *board = board_lower;
 	for (uint8_t cell = pos; cell < (pos + size*step); cell += step)
 		if (board[cell].status != CELL_UNKNOWN) return;
@@ -123,7 +123,10 @@ void placeShip() {
 	}
 	for (uint8_t cell = pos; cell < (pos + size*step); cell += step) 
 		board[cell].status = CELL_SHIP_INTACT;
-	if (active_ship->id < 9) {
+	ship.placed ++;
+	ship.position = flags.active_cell;
+	ship.vertical = flags.vertical;
+	if (active_ship < 9) {
 		active_ship ++;
 	} else{
 		setStatus(setup);
@@ -139,29 +142,30 @@ void drawMenu() {
 }
 
 void initShips() {
-	ships[0] = (ship_t){.size = 4,.id = 0};
-	ships[1] = (ship_t){.size = 3,.id = 1};
-	ships[2] = (ship_t){.size = 3,.id = 2};
-	ships[3] = (ship_t){.size = 3,.id = 3};
-	ships[4] = (ship_t){.size = 2,.id = 4};
-	ships[5] = (ship_t){.size = 2,.id = 5};
-	ships[6] = (ship_t){.size = 2,.id = 6};
-	ships[7] = (ship_t){.size = 2,.id = 7};
-	ships[8] = (ship_t){.size = 1,.id = 8};
-	ships[9] = (ship_t){.size = 1,.id = 9};
-	active_ship = ships;
+	ships[0] = (ship_t){.size = 4};
+	ships[1] = (ship_t){.size = 3};
+	ships[2] = (ship_t){.size = 3};
+	ships[3] = (ship_t){.size = 3};
+	ships[4] = (ship_t){.size = 2};
+	ships[5] = (ship_t){.size = 2};
+	ships[6] = (ship_t){.size = 2};
+	ships[7] = (ship_t){.size = 2};
+	ships[8] = (ship_t){.size = 1};
+	ships[9] = (ship_t){.size = 1};
+	active_ship = 0;
 }
 
 void moveCursor(uint16_t key) {
+	uint8_t size = ships[active_ship].size;
 	if(key & KEY_B) flags.vertical ++;
 	if(key & KEY_UP)    flags.active_cell = (flags.active_cell + 90) % 100;
 	if(key & KEY_DOWN)  flags.active_cell = (flags.active_cell + 10) % 100;
 	if(key & KEY_LEFT)  flags.active_cell = (((flags.active_cell % 10) + 9) % 10) + (flags.active_cell / 10) * 10;
 	if(key & KEY_RIGHT) flags.active_cell = (((flags.active_cell % 10) + 1) % 10) + (flags.active_cell / 10) * 10;
 	if(flags.vertical) {
-		if(flags.active_cell / 10 > 10 - active_ship->size) while (flags.active_cell / 10 > 10 - active_ship->size)  flags.active_cell -= 10;
+		if(flags.active_cell / 10 > 10 - size) while (flags.active_cell / 10 > 10 - size)  flags.active_cell -= 10;
 	} else { 
-		if (flags.active_cell % 10 > 10 - active_ship->size) while(flags.active_cell % 10 > 10 - active_ship->size) flags.active_cell -= 1; 
+		if (flags.active_cell % 10 > 10 - size) while(flags.active_cell % 10 > 10 - size) flags.active_cell -= 1; 
 	}
 }
 

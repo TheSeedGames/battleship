@@ -40,14 +40,13 @@ int main() {
 				if(key & KEY_A) setStatus(lobby);
 				break;
 			case lobby:
-				if (!(getMode() & 0x02)) setStatus(place);
+				if (~getMode() & 0x02) setStatus(place);
 				break;
 			case join:
 				break;
 			case place:
 				moveCursor(key);
-				if(!frame % 2)drawBoard(false);
-				else drawShips();
+				if(~frame & 0x01)drawBoard(false);
 				if(key & KEY_A) placeShip();
 				break;
 			case setup:

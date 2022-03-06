@@ -48,9 +48,11 @@ typedef struct cell_t {
 } cell_t;
 
 typedef struct ship_t {
-	uint8_t destroyed: 1;
-	uint8_t size: 3;
-	uint8_t id: 4;
+	uint16_t placed: 1;
+	uint16_t position:7;
+	uint16_t size: 3;
+	uint16_t vertical:1;
+	uint16_t destroyed: 1;
 } ship_t;
 
 
