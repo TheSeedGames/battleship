@@ -29,18 +29,23 @@
 #define HALF_HEIGHT (SCREEN_HEIGHT/2)
 #define BRAD_PI (1 << 14)
 
+#define TIMER_TURN (0xA0)
+
 void fillWater(cell_t* board);
 void moveCursor(uint16_t keys);
 void initBoards();
 void initShips();
 void drawBoard(bool screen);
-void placeShip ();
+void placeShip();
+void placeShipIA();
 void drawShips();
 void drawMenu();
 bool checkWin();
 bool checkLose();
+void checkCell();
+void sunkShip(ship_t *);
+cell_t* getCell(uint8_t);
 void switchBoards();
-uint8_t checkCell();
 void drawCursor();
 uint8_t getStatus();
 void setStatus(uint8_t status);

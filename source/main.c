@@ -8,6 +8,8 @@
 
 uint8_t getStatus();
 void initSubSprites();
+void timer0Callback();
+volatile uint32_t timer0Count = 1;
 
 int main() {
 	
@@ -21,9 +23,11 @@ int main() {
 	initBoards();
 	initShips();
 	initSubSprites();
-	setStatus(place);
+	setStatus(setup);
 	swiWaitForVBlank();
 	bgInitSub(3, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
+	timerStart(0, ClockDivider_1024, TIMER_FREQ_1024(16), timer0Callback);
+	timerPause(0);
 	bool turn = false;
 	uint16_t key;
 	uint8_t frame = 0;
@@ -46,21 +50,27 @@ int main() {
 				break;
 			case place:
 				moveCursor(key);
-				if(~frame & 0x01)drawBoard(false);
+				if(frame%2) {
+					drawBoard(false);
+					drawCursor();
+				}
 				if(key & KEY_A) placeShip();
 				break;
 			case setup:
-				switchBoards();
+				placeShipIA();
 				break;
 			case play:
+				//if (~timer0Count % TIMER_TURN ) turn = !turn;
 				moveCursor(key);
-				drawBoard(frame % 2);
-				if(key & KEY_A && turn) {
-					checkCell();
-					turn=false;
-					checkWin();
+				if (frame%2) {
+					drawBoard(0);
+					drawCursor();
+				} else {
+					drawBoard(1);
 				}
-				checkLose();
+				if(key & KEY_A) {
+					checkCell();
+				}
 				break;
 			case end:
 				break;
@@ -103,4 +113,7 @@ void initSubSprites(void) {
 	}
 	swiWaitForVBlank();
 	oamUpdate(&oamSub);
+}
+void timer0Callback(){
+	timer0Count ++;
 }
