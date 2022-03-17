@@ -53,7 +53,7 @@ void drawBoard(bool screen){
 		uint8_t x = cell % 10 * 16 + 4;
 		uint8_t y = cell / 10 * 16 + 28;
 		uint16_t color = BLACK;
-		if(board[cell].discovered) {
+		//if(board[cell].discovered) {
 			uint8_t state = board[cell].status;
 			switch (state){
 				case CELL_UNKNOWN:
@@ -75,9 +75,9 @@ void drawBoard(bool screen){
 					color = RED;
 					break;
 				}
-			} else {
+			/*} else {
 				color = GREY;
-			}
+			}*/
 		glBoxFilled(x+1,y+1,x+15,y+15,color);
 	}
 }
@@ -89,12 +89,12 @@ void checkCell() {
 	if (cell->status == CELL_WATER) {
 		oponent_board[active_cell].status=CELL_WATER;
 	} else {
-		ship_t *ship = &oponent_ships[cell->ship_ID];
-		ship->integrity --;
-		if (ship->integrity){
-			sunkShip(ship);
-		} else {
+		ship_t ship = oponent_ships[cell->ship_ID];
+		ship.integrity --;
+		if (ship.integrity){
 			cell->status=CELL_SHIP_HIT;
+		} else {
+			sunkShip(&ship);
 		}
 	}
 }
@@ -153,7 +153,7 @@ void placeShipIA() {
 void placeShip() {
 	uint8_t step = flags.vertical ? 10 : 1;
 	uint8_t pos = active_cell;
-	ship_t  *ship = &place_ship[active_ship];
+	ship_t  *ship = place_ship + active_ship;
 	uint8_t size = ship->size;
 	cell_t *board = place_board;
 	for (uint8_t cell = pos; cell < (pos + size*step); cell += step)
@@ -174,8 +174,10 @@ void placeShip() {
 		if (cell > 10) board[cell-10].status = CELL_WATER;
 		if (cell < 90 ) board[cell+10].status = CELL_WATER;
 	}
-	for (uint8_t cell = pos; cell < (pos + size*step); cell += step) 
+	for (uint8_t cell = pos; cell < (pos + size*step); cell += step) {
 		board[cell].status = CELL_SHIP_INTACT;
+		board[cell].ship_ID = active_ship;
+	}
 	ship->placed=1;
 	ship->integrity=ship->size;
 	ship->position = active_cell;
