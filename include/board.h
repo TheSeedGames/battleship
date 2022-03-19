@@ -32,6 +32,7 @@
 #define TIMER_TURN (0xA0)
 
 void fillWater(cell_t* board);
+void revealBoard(cell_t* board);
 void moveCursor(uint16_t keys);
 void initBoards();
 void initShips();
@@ -43,8 +44,8 @@ void drawMenu();
 bool checkWin();
 bool checkLose();
 void checkCell();
-void sunkShip(ship_t *);
-cell_t* getCell(uint8_t);
+void sunkShip(ship_t*);
+cell_t getCell(uint8_t);
 void switchBoards();
 void drawCursor();
 uint8_t getStatus();

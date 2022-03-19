@@ -21,9 +21,8 @@ int main() {
 	videoSetModeSub(MODE_5_2D);
 	
 	initBoards();
-	initShips();
 	initSubSprites();
-	setStatus(setup);
+	setStatus(place);
 	swiWaitForVBlank();
 	bgInitSub(3, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
 	timerStart(0, ClockDivider_1024, TIMER_FREQ_1024(16), timer0Callback);
@@ -68,9 +67,8 @@ int main() {
 				} else {
 					drawBoard(1);
 				}
-				if(key & KEY_A) {
+				if(key & KEY_A)
 					checkCell();
-				}
 				break;
 			case end:
 				break;

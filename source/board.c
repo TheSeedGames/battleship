@@ -10,35 +10,42 @@ cell_t *board_lower;
 cell_t *player_board;
 cell_t *place_board;
 cell_t *oponent_board;
-cell_t *discovered_board;
 ship_t *place_ship;
 ship_t *player_ships;
 ship_t *oponent_ships;
-uint8_t active_ship;
-uint8_t active_cell;
+uint8_t active_ship =0;
+uint8_t active_cell=0;
 
 void initBoards() {
 	player_board = (cell_t* ) malloc(sizeof(cell_t) * BOARD_CELLS);
 	oponent_board = (cell_t* ) malloc(sizeof(cell_t) * BOARD_CELLS);
 	memset(player_board,CELL_UNKNOWN,BOARD_CELLS);
 	memset(oponent_board,CELL_UNKNOWN,BOARD_CELLS);
+	initShips();
 	board_lower = player_board;
 	place_board = player_board;
 	place_ship = player_ships;
-
+	revealBoard(player_board);
 }
 
 void switchBoards(){
 	board_upper = player_board;
 	board_lower = oponent_board;
 	fillWater(player_board);
-	setStatus(play);
 }
+
 void fillWater(cell_t* board) {
 	for(uint8_t cell = 0; cell < BOARD_CELLS; cell++) {
 		if (board[cell].status==CELL_UNKNOWN) board[cell].status=CELL_WATER;
 	}
 }
+
+void revealBoard(cell_t* board) {
+	for(uint8_t cell = 0; cell < BOARD_CELLS; cell++) {
+		board[cell].discovered=1;
+	}
+}
+
 void drawBoard(bool screen){
 	cell_t *board = board_lower;
 	if (screen) board = board_upper;
@@ -53,7 +60,7 @@ void drawBoard(bool screen){
 		uint8_t x = cell % 10 * 16 + 4;
 		uint8_t y = cell / 10 * 16 + 28;
 		uint16_t color = BLACK;
-		//if(board[cell].discovered) {
+		if (board[cell].discovered) {
 			uint8_t state = board[cell].status;
 			switch (state){
 				case CELL_UNKNOWN:
@@ -75,9 +82,9 @@ void drawBoard(bool screen){
 					color = RED;
 					break;
 				}
-			/*} else {
+			} else {
 				color = GREY;
-			}*/
+			}
 		glBoxFilled(x+1,y+1,x+15,y+15,color);
 	}
 }
@@ -85,33 +92,31 @@ void drawBoard(bool screen){
 void checkCell() {
 	if (oponent_board[active_cell].discovered) return;
 	oponent_board[active_cell].discovered=1;
-	cell_t *cell = getCell(active_cell);
-	if (cell->status == CELL_WATER) {
-		oponent_board[active_cell].status=CELL_WATER;
-	} else {
-		ship_t ship = oponent_ships[cell->ship_ID];
-		ship.integrity --;
-		if (ship.integrity){
+	cell_t *cell = &oponent_board[active_cell];
+	if (cell->status != CELL_WATER) {
+		ship_t *ship = &oponent_ships[cell->ship_ID];
+		ship->integrity --;
+		if (ship->integrity){
 			cell->status=CELL_SHIP_HIT;
 		} else {
-			sunkShip(&ship);
+			sunkShip(ship);
 		}
 	}
 }
 
-void sunkShip(ship_t *ship) {
+void sunkShip(ship_t* ship) {
 	ship->destroyed = 1;
 	uint8_t step = ship->vertical ? 10 : 1;
 	uint8_t pos = ship->position;
 	uint8_t size = ship->size;
-	for (uint8_t cell = pos; cell < (pos + size*step); cell += step)
+	for (uint8_t cell = pos; cell < (pos + (size*step)); cell += step)
 		oponent_board[cell].status=CELL_SHIP_SUNKEN;
 }
 
 void drawCursor() {
 	uint8_t size = player_ships[active_ship].size;
+	if (size > 4 || size ==0) size=1;
 	uint8_t pos = active_cell;
-	active_cell %= 100;
 	uint8_t x = (pos % 10)*16;
 	uint8_t y = (pos / 10)*16;
 	if(flags.vertical)
@@ -139,7 +144,7 @@ void placeShipIA() {
 	place_ship = oponent_ships;
 	srand(time(NULL));
 	active_ship = 0;
-	while (active_ship < 9) {
+	while (active_ship < 10) {
 		flags.vertical = rand()%2;
 		active_cell = rand()%100;
 		moveCursor(0);
@@ -153,7 +158,7 @@ void placeShipIA() {
 void placeShip() {
 	uint8_t step = flags.vertical ? 10 : 1;
 	uint8_t pos = active_cell;
-	ship_t  *ship = place_ship + active_ship;
+	ship_t  *ship = &place_ship[active_ship];
 	uint8_t size = ship->size;
 	cell_t *board = place_board;
 	for (uint8_t cell = pos; cell < (pos + size*step); cell += step)
@@ -182,15 +187,16 @@ void placeShip() {
 	ship->integrity=ship->size;
 	ship->position = active_cell;
 	ship->vertical = flags.vertical;
-	if (active_ship < 9) {
+	if (active_ship < 10) {
 		active_ship ++;
-	} else{
-		setStatus(setup);
+	} else {
+		if (getStatus() == place)
+			setStatus(setup);
 	 }
 }
-inline cell_t* getCell(uint8_t cell_number) 
+inline cell_t getCell(uint8_t cell_number) 
 {
-	return &oponent_board[cell_number];
+	return oponent_board[cell_number];
 }
 
 void drawMenu() {
