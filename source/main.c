@@ -4,12 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gl2d.h>
+#include <nds/interrupts.h>
 #include "board.h"
 
 uint8_t getStatus();
 void initSubSprites();
 void timer0Callback();
-volatile uint32_t timer0Count = 1;
+void timer1Callback();
+volatile uint32_t timer0Count = 0;
 
 int main() {
 	
@@ -25,8 +27,9 @@ int main() {
 	setStatus(place);
 	swiWaitForVBlank();
 	bgInitSub(3, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
-	timerStart(0, ClockDivider_1024, TIMER_FREQ_1024(16), timer0Callback);
-	timerPause(0);
+	timerStart(0, ClockDivider_64, TIMER_FREQ_64(100), NULL);
+	timerStart(1, ClockDivider_256, TIMER_FREQ_256(10), timer1Callback);
+	//timerPause(1);
 	bool turn = false;
 	uint16_t key;
 	uint8_t frame = 0;
@@ -112,6 +115,11 @@ void initSubSprites(void) {
 	swiWaitForVBlank();
 	oamUpdate(&oamSub);
 }
+
 void timer0Callback(){
-	timer0Count ++;
+	exit(0);
+}
+
+void timer1Callback(){
+	//exit(5);
 }

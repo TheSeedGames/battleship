@@ -153,6 +153,7 @@ void placeShipIA() {
 	setStatus(play);
 	fillWater(oponent_board);
 	timerUnpause(0);
+	active_cell = rand()%100;
 	}
 
 void placeShip() {
@@ -187,13 +188,11 @@ void placeShip() {
 	ship->integrity=ship->size;
 	ship->position = active_cell;
 	ship->vertical = flags.vertical;
-	if (active_ship < 10) {
-		active_ship ++;
-	} else {
-		if (getStatus() == place)
+	active_ship ++;
+	if (active_ship > 9 && getStatus() == place)
 			setStatus(setup);
-	 }
 }
+
 inline cell_t getCell(uint8_t cell_number) 
 {
 	return oponent_board[cell_number];
@@ -231,6 +230,7 @@ void initShips() {
 
 void moveCursor(uint16_t key) {
 	uint8_t size = player_ships[active_ship].size;
+	if(size ==0 || size > 4) size =1;
 	if(key & KEY_B) flags.vertical ++;
 	if(key & KEY_UP)    active_cell = (active_cell + 90) % 100;
 	if(key & KEY_DOWN)  active_cell = (active_cell + 10) % 100;
